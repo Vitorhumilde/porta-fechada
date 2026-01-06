@@ -47,15 +47,6 @@ body{
   box-shadow: 0 6px 24px rgba(0,0,0,0.6);
 }
 
-/* Esquerda: personagem (imagem do visitante) */
-.left{
-  display:flex;
-  align-items:flex-end;
-  justify-content:flex-start;
-  padding: 20px;
-  min-height: 0;
-  overflow: hidden;
-}
 
 /* A imagem do visitante fica "simbólica" à esquerda (com max-width) */
 #visitor-img{

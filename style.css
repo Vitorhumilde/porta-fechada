@@ -47,18 +47,6 @@ body{
   box-shadow: 0 6px 24px rgba(0,0,0,0.6);
 }
 
-
-/* A imagem do visitante fica "simbólica" à esquerda (com max-width) */
-#visitor-img{
-  width: 90%;
-  max-width: 420px;
-  height: auto;
-  border-radius: 8px;
-  object-fit: cover;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  transform: translateX(-6%);
-}
-
 /* Direita: janela de diálogo */
 .right{
   display:flex;

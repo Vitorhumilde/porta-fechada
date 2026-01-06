@@ -1,191 +1,120 @@
-// script.js — fluxo simples do jogo com efeito typewriter, som e transições
-// Estrutura de dados: array de objetos { question, options: [{ text, response, class? }] }
+// Main game script
 
+const startBtn = document.getElementById('startBtn');
+const questionContainer = document.getElementById('questionContainer');
+const questionText = document.getElementById('questionText');
+const answersDiv = document.getElementById('answers');
+const statusDiv = document.getElementById('status');
+
+// Audio elements (IDs must match those in index.html)
+const doorAudio = document.getElementById('door-open');
+const typingAudio = document.getElementById('typing');
+const ambienceAudio = document.getElementById('ambience');
+
+// Increase gameData to 10 questions
 const gameData = [
-  {
-    question: 'Alguém bate na sua porta. "Quem é?"',
-    options: [
-      { text: 'Diz que é vizinho', response: 'Ele diz que é seu vizinho — mas a voz soa estranha.' },
-      { text: 'Diz que é entrega', response: 'Uma entrega? Você não pediu nada. A porta permanece entreaberta.' }
-    ]
-  },
-  {
-    question: 'A pessoa pergunta por você diretamente.',
-    options: [
-      { text: 'Pedir identificação', response: 'Ele hesita, mostra algo que parece legítimo — mas está borrado.' },
-      { text: 'Fechar a porta', response: 'Você fecha a porta. Ouve passos que logo se afastam.' }
-    ]
-  },
-  {
-    question: 'Você oferece ajuda. A pessoa sorri.',
-    options: [
-      { text: 'Convidar a entrar', response: 'Ao entrar, a sala fica estranhamente fria.' },
-      { text: 'Pedir que volte depois', response: 'Ele diz que retornará — e então nada mais se move.' }
-    ]
-  },
-  // É fácil adicionar mais entradas aqui
+  {q: 'What is 2 + 2?', a: '4'},
+  {q: 'What color is the sky on a clear day?', a: 'blue'},
+  {q: 'What is the capital of France?', a: 'paris'},
+  {q: 'How many legs does a spider have?', a: '8'},
+  {q: 'What is H2O commonly known as?', a: 'water'},
+  {q: 'Which planet is known as the Red Planet?', a: 'mars'},
+  {q: 'What is the opposite of hot?', a: 'cold'},
+  {q: 'How many months are in a year?', a: '12'},
+  {q: 'What do bees produce?', a: 'honey'},
+  {q: 'What is the largest mammal?', a: 'blue whale'}
 ];
 
-// referências DOM
-const textEl = document.getElementById('text');
-const choicesEl = document.getElementById('choices');
-const continueBtn = document.getElementById('continue-btn');
-const typingSfx = document.getElementById('typing-sfx');
-const ambience = document.getElementById('ambience');
-
 let currentIndex = 0;
-let isTyping = false;
+let firstQuestionShown = false;
 
-// configurações do typewriter
-const TYPING_SPEED = 24; // ms por caractere
-const CHAR_SFX_FREQ = 2; // tocar som a cada N caracteres (para evitar excesso)
+startBtn.addEventListener('click', () => {
+  startBtn.disabled = true;
+  startGame();
+});
 
-// inicia música ambiente em volume baixo (se disponível)
-function tryStartAmbience(){
-  if(!ambience) return;
-  ambience.volume = 0.16;
-  // tentativa respeitando autoplay bloqueio: só toca se usuário interagiu ou se browser permitir
-  ambience.play().catch(()=> {
-    // aguardamos a primeira interação do usuário para acionar
-    document.addEventListener('click', function onFirst() {
-      ambience.play().catch(()=>{});
-      document.removeEventListener('click', onFirst);
-    });
-  });
+function startGame() {
+  // Play ambience (user interaction already occurred on click)
+  try { ambienceAudio.currentTime = 0; ambienceAudio.play(); } catch (e) { console.warn('Ambience could not autoplay:', e); }
+
+  questionContainer.classList.remove('hidden');
+  showQuestion(currentIndex);
 }
 
-// typewriter que retorna Promise para encadear ações
-function typeText(targetEl, text, { speed = TYPING_SPEED, sound = typingSfx } = {}) {
-  return new Promise((resolve) => {
-    if(!targetEl) return resolve();
-    targetEl.textContent = '';
-    let i = 0;
-    isTyping = true;
+function showQuestion(index) {
+  const item = gameData[index];
+  answersDiv.innerHTML = '';
+  statusDiv.textContent = `Question ${index + 1} of ${gameData.length}`;
 
-    function step() {
-      if(i <= text.length - 1) {
-        targetEl.textContent += text[i];
-        // tocar som a cada CHAR_SFX_FREQ caracteres (se houver)
-        if(sound && (i % CHAR_SFX_FREQ) === 0) {
-          try {
-            sound.currentTime = 0;
-            sound.volume = 0.12 + Math.random() * 0.08;
-            sound.play().catch(()=>{});
-          } catch(e){}
-        }
-        i++;
-        setTimeout(step, speed + Math.floor(Math.random() * 8));
-      } else {
-        isTyping = false;
-        resolve();
-      }
-    }
-    step();
-  });
-}
-
-// limpa e renderiza as opções para a pergunta atual
-function showOptions(options) {
-  choicesEl.innerHTML = '';
-  options.forEach((opt, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    if(opt.class) btn.classList.add(opt.class);
-    btn.textContent = opt.text;
-    btn.type = 'button';
-    btn.addEventListener('click', () => onChoice(idx));
-    choicesEl.appendChild(btn);
-  });
-}
-
-// quando o jogador escolhe uma opção
-async function onChoice(optionIndex) {
-  if (isTyping) return; // prevenção durante digitação
-  // esconder as opções com fade-out
-  choicesEl.classList.add('fade-out');
-  setTimeout(() => choicesEl.classList.add('hidden'), 180);
-
-  const current = gameData[currentIndex];
-  const chosen = current.options[optionIndex];
-
-  // mostrar a resposta na janela de diálogo
-  const bubble = document.getElementById('bubble');
-  bubble.classList.remove('fade-in');
-  bubble.classList.add('fade-out');
-  await new Promise(r => setTimeout(r, 180));
-  bubble.classList.remove('fade-out');
-  bubble.classList.add('fade-in');
-
-  await typeText(textEl, chosen.response);
-
-  // exibir botão continuar
-  continueBtn.classList.remove('hidden');
-  continueBtn.setAttribute('aria-hidden', 'false');
-  continueBtn.addEventListener('click', onContinue, { once: true });
-}
-
-// botão continuar -> avança para próxima pergunta
-async function onContinue() {
-  if (isTyping) return;
-  continueBtn.classList.add('hidden');
-  continueBtn.setAttribute('aria-hidden', 'true');
-
-  currentIndex++;
-  if (currentIndex >= gameData.length) {
-    // fim do jogo (simples)
-    const bubble = document.getElementById('bubble');
-    bubble.classList.remove('fade-in');
-    bubble.classList.add('fade-out');
-    await new Promise(r => setTimeout(r, 180));
-    bubble.classList.remove('fade-out');
-    bubble.classList.add('fade-in');
-    await typeText(textEl, 'Nada mais acontece por enquanto. Fim do trecho — adicione mais perguntas para continuar.');
-    // opcional: mostrar reiniciar
-    showRestart();
-    return;
+  // If this is the first question, play the door open sound once
+  if (!firstQuestionShown) {
+    firstQuestionShown = true;
+    try { doorAudio.currentTime = 0; doorAudio.play(); } catch (e) { console.warn('Door audio could not play:', e); }
   }
 
-  // mostrar próxima pergunta
-  await showQuestion(currentIndex);
-}
-
-// renderiza a pergunta index
-async function showQuestion(index) {
-  const data = gameData[index];
-  // mostrar a pergunta como texto com typewriter
-  const bubble = document.getElementById('bubble');
-  bubble.classList.remove('fade-out');
-  bubble.classList.add('fade-in');
-
-  // limpar possíveis textos e opções
-  textEl.textContent = '';
-  choicesEl.classList.remove('hidden');
-  choicesEl.classList.remove('fade-out');
-  choicesEl.innerHTML = '';
-
-  await typeText(textEl, data.question);
-
-  // após a pergunta digitada, renderizar opções
-  showOptions(data.options);
-}
-
-// reiniciar (simples)
-function showRestart() {
-  choicesEl.innerHTML = '';
-  const btn = document.createElement('button');
-  btn.className = 'choice-btn primary';
-  btn.textContent = 'Reiniciar';
-  btn.addEventListener('click', () => {
-    currentIndex = 0;
-    showQuestion(0);
+  // Use a typing effect for the question text and play typing SFX during typing
+  typeText(item.q, questionText, () => {
+    // Once the question finishes typing, show simple answer buttons (example: yes/no or text input)
+    // For simplicity, we'll show a single input-style button that opens a prompt
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = 'Answer';
+    btn.addEventListener('click', () => {
+      const resp = prompt('Type your answer:');
+      if (resp !== null) checkAnswer(resp);
+    });
+    answersDiv.appendChild(btn);
   });
-  choicesEl.appendChild(btn);
-  choicesEl.classList.remove('hidden');
 }
 
-// inicialização
-document.addEventListener('DOMContentLoaded', () => {
-  tryStartAmbience();
-  // garantir que o primeiro texto apareça
-  showQuestion(currentIndex);
-});
+function checkAnswer(resp) {
+  const correct = gameData[currentIndex].a.toLowerCase().trim();
+  if (resp.toLowerCase().trim() === correct) {
+    statusDiv.textContent = 'Correct!';
+  } else {
+    statusDiv.textContent = `Wrong — correct answer: ${gameData[currentIndex].a}`;
+  }
+  // Move to next question after a short delay
+  currentIndex++;
+  if (currentIndex < gameData.length) {
+    setTimeout(() => showQuestion(currentIndex), 900);
+  } else {
+    setTimeout(endGame, 900);
+  }
+}
+
+function endGame() {
+  questionText.textContent = 'Game over — thanks for playing!';
+  answersDiv.innerHTML = '';
+  startBtn.disabled = false;
+  startBtn.textContent = 'Play Again';
+  // Stop ambience
+  try { ambienceAudio.pause(); ambienceAudio.currentTime = 0; } catch (e) {}
+  currentIndex = 0;
+  firstQuestionShown = false;
+}
+
+// Typing effect that plays typing SFX while typing
+function typeText(text, element, cb) {
+  element.textContent = '';
+  const chars = Array.from(text);
+  let i = 0;
+
+  // Ensure typing audio loops while typing
+  typingAudio.loop = true;
+  try { typingAudio.currentTime = 0; typingAudio.play(); } catch (e) { /* may be blocked */ }
+
+  function step() {
+    if (i < chars.length) {
+      element.textContent += chars[i++];
+      // small random delay to feel natural
+      const delay = 20 + Math.random() * 60;
+      setTimeout(step, delay);
+    } else {
+      // finished typing
+      try { typingAudio.pause(); typingAudio.currentTime = 0; } catch (e) {}
+      if (typeof cb === 'function') cb();
+    }
+  }
+  step();
+}

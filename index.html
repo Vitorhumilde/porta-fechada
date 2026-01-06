@@ -1,41 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Porta Fechada — Jogo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Porta Fechada</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="game" class="game-grid" role="application" aria-labelledby="game-title">
-    <!-- Personagem / visitante (esquerda) -->
-    <aside class="panel left" id="panel-left" aria-hidden="false">
-      <img id="visitor-img" src="imagens/jogo sus.webp" alt="Visitante na porta" />
-    </aside>
-
-    <!-- Janela de diálogo (direita) -->
-    <section class="panel right" id="dialogue" aria-labelledby="dialogue-title">
-      <h2 id="dialogue-title" class="sr-only">Janela de diálogo</h2>
-
-      <div id="bubble" class="bubble fade-in" aria-live="polite" aria-atomic="true">
-        <p id="text" class="typewriter"></p>
+  <main>
+    <h1>Porta Fechada</h1>
+    <div id="game">
+      <button id="startBtn">Start Game</button>
+      <div id="questionContainer" class="hidden">
+        <div id="questionText"></div>
+        <div id="answers"></div>
+        <div id="status"></div>
       </div>
+    </div>
+  </main>
 
-      <div id="controls" class="controls">
-        <button id="continue-btn" class="btn hidden" aria-hidden="true">Continuar</button>
-      </div>
-    </section>
+  <!-- Audio elements -->
+  <!-- Door open sound (played once when the first question appears) -->
+  <audio id="door-open" src="audio/sfx/door_open.mp3" preload="auto"></audio>
+  <!-- Typing SFX (used during typing effect) -->
+  <audio id="typing" src="audio/sfx/typing.mp3" preload="auto"></audio>
+  <!-- Ambience music (loops during the game) -->
+  <audio id="ambience" src="audio/music/ambience.mp3" preload="auto" loop></audio>
 
-    <!-- Área inferior com botões de escolha -->
-    <nav class="panel bottom" id="choices" aria-label="Escolhas do jogador">
-      <!-- Botões de opção serão inseridos dinamicamente -->
-    </nav>
-  </div>
-
-  <!-- Áudios: opcional. Se não existirem, o código verifica e prossegue sem erro. -->
-  <audio id="typing-sfx" preload="auto" src="audio/typing.mp3"></audio>
-  <audio id="ambience" preload="auto" loop src="audio/ambience.mp3"></audio>
-
-  <script src="script.js" defer></script>
+  <script src="script.js"></script>
 </body>
 </html>

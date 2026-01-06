@@ -1,32 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Porta Fechada</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>Porta Fechada</h1>
-    <div id="game">
-      <button id="startBtn">Start Game</button>
-      <div id="questionContainer" class="hidden">
-        <div id="questionText"></div>
-        <div id="answers"></div>
-        <div id="status"></div>
+
+  <main id="game" class="game-container" aria-labelledby="titulo-jogo">
+    <section class="left" id="main-area">
+      <h1 id="titulo-jogo">Porta Fechada</h1>
+
+      <p id="texto">Alguém bate à porta.</p>
+
+      <!-- imagem incluída também para leitores de tela, mas a imagem de fundo é aplicada via CSS -->
+      <img id="imagem" src="imagens/jogo sus.webp" alt="Pessoa encostada na porta" class="sr-only" aria-hidden="true" />
+
+      <div id="decisao" class="decisao">
+        <button id="btn-entrar" class="action" aria-pressed="false">Deixar entrar</button>
+        <button id="btn-expulsar" class="action expulsar" aria-pressed="false">Expulsar</button>
       </div>
-    </div>
+
+      <p id="resultado" aria-live="polite"></p>
+    </section>
+
+    <aside class="right" id="perguntas" aria-label="Perguntas do jogador">
+      <!-- Perguntas serão inseridas aqui via JavaScript -->
+    </aside>
   </main>
 
-  <!-- Audio elements -->
-  <!-- Door open sound (played once when the first question appears) -->
-  <audio id="door-open" src="audio/sfx/door_open.mp3" preload="auto"></audio>
-  <!-- Typing SFX (used during typing effect) -->
-  <audio id="typing" src="audio/sfx/typing.mp3" preload="auto"></audio>
-  <!-- Ambience music (loops during the game) -->
-  <audio id="ambience" src="audio/music/ambience.mp3" preload="auto" loop></audio>
-
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>

@@ -1,42 +1,58 @@
-const perguntasFixas = [
-  "Onde você estava antes de bater na porta?",
-  "O que você faz quando ninguém está olhando?",
-  "Qual comida você defenderia até o fim?",
-  "O que te deixa desconfortável sem saber por quê?",
-  "Se estivesse mentindo agora, como falaria?",
-  "Você é humano?"
+// Exemplo simples para popular perguntas e controlar ações.
+const perguntas = [
+  "Quem é você?",
+  "O que deseja aqui?",
+  "Você tem máscara?",
+  "Podemos saber seu nome?",
+  "Por que veio a esta hora?"
 ];
 
-const pessoa = {
-  nome: "Caso 0",
-  imagem: "imagens/vitor.jpg",
-  respostas: [
-    "Em casa. O silêncio ajuda a pensar.",
-    "Repito pensamentos até eles fazerem sentido.",
-    "Pão com qualquer coisa. Simples demais para ser mentira.",
-    "Silêncios longos demais.",
-    "Falaria exatamente assim.",
-    "Acho que sim."
-  ],
-  tipo: "suspeito"
-};
+let selecionada = null;
 
-const perguntasDiv = document.getElementById("perguntas");
-const imagem = document.getElementById("imagem");
-const resultado = document.getElementById("resultado");
-
-imagem.src = pessoa.imagem;
-
-perguntasFixas.forEach((texto, i) => {
-  const btn = document.createElement("button");
-  btn.innerText = texto;
-  btn.onclick = () => alert(pessoa.respostas[i]);
-  perguntasDiv.appendChild(btn);
+document.addEventListener("DOMContentLoaded", () => {
+  renderPerguntas();
+  document.getElementById('btn-entrar').addEventListener('click', () => decidir('entrar'));
+  document.getElementById('btn-expulsar').addEventListener('click', () => decidir('expulsar'));
 });
 
-function decidir(escolha) {
-  resultado.innerText =
-    pessoa.tipo === "humano"
-      ? "Era humano."
-      : "Algo estava errado com essa pessoa.";
+function renderPerguntas(){
+  const container = document.getElementById('perguntas');
+  container.innerHTML = ''; // limpa
+  perguntas.forEach((texto, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'question-button';
+    btn.textContent = texto;
+    btn.dataset.index = idx;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.addEventListener('click', () => selecionarPergunta(idx));
+    container.appendChild(btn);
+  });
+}
+
+function selecionarPergunta(idx){
+  const texto = perguntas[idx];
+  const p = document.getElementById('texto');
+  p.textContent = `Você perguntou: "${texto}"`;
+
+  // marcar visualmente a pergunta selecionada
+  const buttons = document.querySelectorAll('.question-button');
+  buttons.forEach((b) => {
+    b.setAttribute('aria-pressed', 'false');
+  });
+  const btn = buttons[idx];
+  if(btn){
+    btn.setAttribute('aria-pressed', 'true');
+  }
+
+  selecionada = idx;
+}
+
+function decidir(acao){
+  const resultado = document.getElementById('resultado');
+  if(acao === 'entrar'){
+    resultado.textContent = 'Você deixou a pessoa entrar. O que acontece a seguir?';
+  } else {
+    resultado.textContent = 'Você expulsou a pessoa. Fique atento ao que acontece.';
+  }
 }

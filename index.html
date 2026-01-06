@@ -2,26 +2,34 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Porta Fechada</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div id="game">
-    <p id="texto">Alguém bate à porta.</p>
+  <main id="game" class="game-container" aria-labelledby="titulo-jogo">
+    <section class="left" id="main-area">
+      <h1 id="titulo-jogo">Porta Fechada</h1>
 
-    <img id="imagem" src="imagens/jogo sus.webp" alt="Pessoa na porta">
+      <p id="texto">Alguém bate à porta.</p>
 
-    <div id="perguntas"></div>
+      <!-- imagem incluída também para leitores de tela, mas a imagem de fundo é aplicada via CSS -->
+      <img id="imagem" src="imagens/jogo sus.webp" alt="Pessoa encostada na porta" class="sr-only" aria-hidden="true" />
 
-    <div id="decisao">
-      <button onclick="decidir('entrar')">Deixar entrar</button>
-      <button onclick="decidir('expulsar')">Expulsar</button>
-    </div>
+      <div id="decisao" class="decisao">
+        <button id="btn-entrar" class="action" aria-pressed="false">Deixar entrar</button>
+        <button id="btn-expulsar" class="action expulsar" aria-pressed="false">Expulsar</button>
+      </div>
 
-    <p id="resultado"></p>
-  </div>
+      <p id="resultado" aria-live="polite"></p>
+    </section>
 
-  <script src="script.js"></script>
+    <aside class="right" id="perguntas" aria-label="Perguntas do jogador">
+      <!-- Perguntas serão inseridas aqui via JavaScript -->
+    </aside>
+  </main>
+
+  <script src="script.js" defer></script>
 </body>
 </html>

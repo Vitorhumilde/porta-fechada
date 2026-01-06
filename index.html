@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Porta Fechada</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Porta Fechada — Jogo</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="game" class="game-grid" role="application" aria-labelledby="game-title">
+    <!-- Personagem / visitante (esquerda) -->
+    <aside class="panel left" id="panel-left" aria-hidden="false">
+      <img id="visitor-img" src="imagens/jogo sus.webp" alt="Visitante na porta" />
+    </aside>
 
-  <main id="game" class="game-container" aria-labelledby="titulo-jogo">
-    <section class="left" id="main-area">
-      <h1 id="titulo-jogo">Porta Fechada</h1>
+    <!-- Janela de diálogo (direita) -->
+    <section class="panel right" id="dialogue" aria-labelledby="dialogue-title">
+      <h2 id="dialogue-title" class="sr-only">Janela de diálogo</h2>
 
-      <p id="texto">Alguém bate à porta.</p>
-
-      <!-- imagem incluída também para leitores de tela, mas a imagem de fundo é aplicada via CSS -->
-      <img id="imagem" src="imagens/jogo sus.webp" alt="Pessoa encostada na porta" class="sr-only" aria-hidden="true" />
-
-      <div id="decisao" class="decisao">
-        <button id="btn-entrar" class="action" aria-pressed="false">Deixar entrar</button>
-        <button id="btn-expulsar" class="action expulsar" aria-pressed="false">Expulsar</button>
+      <div id="bubble" class="bubble fade-in" aria-live="polite" aria-atomic="true">
+        <p id="text" class="typewriter"></p>
       </div>
 
-      <p id="resultado" aria-live="polite"></p>
+      <div id="controls" class="controls">
+        <button id="continue-btn" class="btn hidden" aria-hidden="true">Continuar</button>
+      </div>
     </section>
 
-    <aside class="right" id="perguntas" aria-label="Perguntas do jogador">
-      <!-- Perguntas serão inseridas aqui via JavaScript -->
-    </aside>
-  </main>
+    <!-- Área inferior com botões de escolha -->
+    <nav class="panel bottom" id="choices" aria-label="Escolhas do jogador">
+      <!-- Botões de opção serão inseridos dinamicamente -->
+    </nav>
+  </div>
+
+  <!-- Áudios: opcional. Se não existirem, o código verifica e prossegue sem erro. -->
+  <audio id="typing-sfx" preload="auto" src="audio/typing.mp3"></audio>
+  <audio id="ambience" preload="auto" loop src="audio/ambience.mp3"></audio>
 
   <script src="script.js" defer></script>
 </body>

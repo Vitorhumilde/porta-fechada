@@ -1,173 +1,191 @@
-// script.js - Fluxo de perguntas interativo em Português
-// Substitui o conteúdo anterior e implementa: startGame, showQuestion, handleChoice, nextQuestion, restartGame
+// script.js — fluxo do jogo com efeito typewriter, som e transições
+// Estrutura de dados: array de objetos { question, options: [{ text, response, class? }] }
 
 const gameData = [
   {
-    question: 'Você acorda em um quarto escuro com uma porta entreaberta. O que você faz?',
-    choices: [
-      { text: 'Empurrar a porta lentamente.', response: 'Você empurra a porta e ouve um rangido profundo. Algo se move do outro lado.' },
-      { text: 'Gritar por ajuda.', response: 'Sua voz ecoa pelo corredor; ninguém responde. O silêncio aumenta.' },
-      { text: 'Procurar uma luz.', response: 'Você tateia a parede e encontra um interruptor. Uma luz fraca revela marcas no chão.' }
+    question: 'Alguém bate na sua porta. "Quem é?"',
+    options: [
+      { text: 'Diz que é vizinho', response: 'Ele diz que é seu vizinho — mas a voz soa estranha.' },
+      { text: 'Diz que é entrega', response: 'Uma entrega? Você não pediu nada. A porta permanece entreaberta.' }
     ]
   },
   {
-    question: 'No corredor há duas portas: uma com som de água e outra com ar frio. Para qual você vai?',
-    choices: [
-      { text: 'Porta com som de água.', response: 'Água pinga ao longe. Um cheiro de maresia invade o corredor.' },
-      { text: 'Porta com ar frio.', response: 'O ar frio carrega respingos e um sopro que parece sussurrar seu nome.' }
+    question: 'A pessoa pergunta por você diretamente.',
+    options: [
+      { text: 'Pedir identificação', response: 'Ele hesita, mostra algo que parece legítimo — mas está borrado.' },
+      { text: 'Fechar a porta', response: 'Você fecha a porta. Ouve passos que logo se afastam.' }
     ]
   },
   {
-    question: 'Você encontra um bilhete rasgado com um número. O que faz?',
-    choices: [
-      { text: 'Guardar o bilhete.', response: 'Você guarda o bilhete no bolso — pode ser útil depois.' },
-      { text: 'Ignorar e seguir em frente.', response: 'Você segue em frente, mas algo dentro de você insiste que o número era importante.' }
+    question: 'Você oferece ajuda. A pessoa sorri.',
+    options: [
+      { text: 'Convidar a entrar', response: 'Ao entrar, a sala fica estranhamente fria.' },
+      { text: 'Pedir que volte depois', response: 'Ele diz que retornará — e então nada mais se move.' }
     ]
   },
-  {
-    question: 'Há uma caixa trancada com três símbolos. Qual símbolo você escolhe tocar?',
-    choices: [
-      { text: 'O símbolo da lua.', response: 'Ao tocar, a caixa vibra e libera um som baixo — nada acontece por enquanto.' },
-      { text: 'O símbolo do sol.', response: 'Uma luz quente atravessa as fendas da caixa; algo dentro brilha por um instante.' },
-      { text: 'O símbolo da chave.', response: 'Um clique ecoa. A caixa permanece fechada, mas agora parece mais próxima de abrir.' }
-    ]
-  },
-  {
-    question: 'Você encontra uma escada que sobe e outra que desce. Para onde vai?',
-    choices: [
-      { text: 'Subir a escada.', response: 'No alto, uma janela mostra um céu estranho. Algo se move lá fora.' },
-      { text: 'Descer a escada.', response: 'No subsolo, o ar é denso e há marcas no chão levando a uma porta velha.' }
-    ]
-  },
-  {
-    question: 'Um estranho aparece e oferece ajuda. Você aceita?',
-    choices: [
-      { text: 'Aceitar ajuda.', response: 'O estranho sorri, mas seus olhos parecem vazios. Ele aponta para um corredor seguro.' },
-      { text: 'Recusar e seguir sozinho.', response: 'Você recusa; o estranho desaparece em silêncio, como se nunca tivesse estado ali.' }
-    ]
-  },
-  {
-    question: 'Há um espelho antigo que reflete algo diferente. O que você faz?',
-    choices: [
-      { text: 'Olhar cuidadosamente.', response: 'Seu reflexo sorri primeiro — você não sorriu. O vidro fica quente ao toque.' },
-      { text: 'Quebrar o espelho.', response: 'O som do vidro se espalha e, por um momento, você sente como se tivesse libertado algo.' }
-    ]
-  },
-  {
-    question: 'Você encontra um mapa com um X vermelho. O que faz?',
-    choices: [
-      { text: 'Seguir o mapa.', response: 'O X marca um local sob o chão — você encontra uma pequena abertura com um objeto brilhante.' },
-      { text: 'Desconfiar e ignorar.', response: 'Você decide não seguir o mapa. Mais tarde, se arrepende de não ter investigado.' }
-    ]
-  },
-  {
-    question: 'Uma porta trancada exige uma senha. Você lembra do bilhete rasgado? O que tenta?',
-    choices: [
-      { text: 'Usar o número do bilhete.', response: 'A porta faz um clique e se abre lentamente — parecia ser a senha correta.' },
-      { text: 'Tentar uma combinação aleatória.', response: 'As tentativas falham e um alarme distante começa a soar.' }
-    ]
-  },
-  {
-    question: 'Você está diante de uma saída. Ao atravessá-la, você espera:',
-    choices: [
-      { text: 'Liberdade e luz.', response: 'Você sai para fora; o ar fresco inunda seus pulmões. A jornada termina — por enquanto.' },
-      { text: 'Outro enigma.', response: 'A porta leva a um corredor ainda mais longo. A aventura continua.' }
-    ]
-  }
+  // É fácil adicionar mais entradas aqui
 ];
 
-let currentQuestionIndex = 0;
-let answered = false;
+// referências DOM
+const textEl = document.getElementById('text');
+const choicesEl = document.getElementById('choices');
+const continueBtn = document.getElementById('continue-btn');
+const typingSfx = document.getElementById('typing-sfx');
+const ambience = document.getElementById('ambience');
 
-// Elementos da interface
-const textoEl = document.getElementById('texto');
-const perguntasEl = document.getElementById('perguntas');
+let currentIndex = 0;
+let isTyping = false;
 
-function startGame() {
-  currentQuestionIndex = 0;
-  answered = false;
-  if (!textoEl || !perguntasEl) {
-    console.warn('Elementos #texto ou #perguntas não encontrados no DOM.');
-    return;
-  }
-  // Limpa interface e inicia
-  textoEl.textContent = '';
-  perguntasEl.innerHTML = '';
-  showQuestion(currentQuestionIndex);
-}
+// configurações do typewriter
+const TYPING_SPEED = 24; // ms por caractere
+const CHAR_SFX_FREQ = 2; // tocar som a cada N caracteres (para evitar excesso)
 
-function showQuestion(index) {
-  const q = gameData[index];
-  if (!q) return;
-  answered = false;
-  // Mostrar apenas a pergunta no elemento #texto
-  textoEl.textContent = q.question;
-
-  // Renderizar botões de opções em #perguntas
-  perguntasEl.innerHTML = '';
-  q.choices.forEach((choice, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'opcao';
-    btn.type = 'button';
-    btn.textContent = choice.text;
-    btn.dataset.choiceIndex = i;
-    btn.addEventListener('click', () => handleChoice(i));
-    perguntasEl.appendChild(btn);
+// inicia música ambiente em volume baixo (se disponível)
+function tryStartAmbience(){
+  if(!ambience) return;
+  ambience.volume = 0.16;
+  // tentativa respeitando autoplay bloqueio: só toca se usuário interagiu ou se browser permitir
+  ambience.play().catch(()=> {
+    // aguardamos a primeira interação do usuário para acionar
+    document.addEventListener('click', function onFirst() {
+      ambience.play().catch(()=>{});
+      document.removeEventListener('click', onFirst);
+    });
   });
 }
 
-function handleChoice(choiceIndex) {
-  if (answered) return; // evita múltiplas respostas
-  const q = gameData[currentQuestionIndex];
-  if (!q) return;
+// typewriter que retorna Promise para encadear ações
+function typeText(targetEl, text, { speed = TYPING_SPEED, sound = typingSfx } = {}) {
+  return new Promise((resolve) => {
+    if(!targetEl) return resolve();
+    targetEl.textContent = '';
+    let i = 0;
+    isTyping = true;
 
-  answered = true;
-  const choice = q.choices[choiceIndex];
-
-  // Exibir resposta no #texto
-  textoEl.textContent = choice.response;
-
-  // Indicar visualmente a escolha e desabilitar outras opções
-  Array.from(perguntasEl.querySelectorAll('button.opcao')).forEach((btn) => {
-    btn.disabled = true;
-    if (Number(btn.dataset.choiceIndex) === choiceIndex) {
-      btn.classList.add('selecionada');
+    function step() {
+      if(i <= text.length - 1) {
+        targetEl.textContent += text[i];
+        // tocar som a cada CHAR_SFX_FREQ caracteres (se houver)
+        if(sound && (i % CHAR_SFX_FREQ) === 0) {
+          try {
+            sound.currentTime = 0;
+            sound.volume = 0.12 + Math.random() * 0.08;
+            sound.play().catch(()=>{});
+          } catch(e){}
+        }
+        i++;
+        setTimeout(step, speed + Math.floor(Math.random() * 8));
+      } else {
+        isTyping = false;
+        resolve();
+      }
     }
+    step();
   });
-
-  // Adicionar controle Continuar ou Reiniciar
-  const controlBtn = document.createElement('button');
-  controlBtn.type = 'button';
-  if (currentQuestionIndex < gameData.length - 1) {
-    controlBtn.textContent = 'Continuar';
-    controlBtn.addEventListener('click', nextQuestion);
-  } else {
-    controlBtn.textContent = 'Reiniciar';
-    controlBtn.addEventListener('click', restartGame);
-  }
-  controlBtn.className = 'controle';
-  // Espaçamento antes do controle
-  const spacer = document.createElement('div');
-  spacer.style.height = '8px';
-  perguntasEl.appendChild(spacer);
-  perguntasEl.appendChild(controlBtn);
 }
 
-function nextQuestion() {
-  currentQuestionIndex += 1;
-  if (currentQuestionIndex >= gameData.length) {
-    restartGame();
+// limpa e renderiza as opções para a pergunta atual
+function showOptions(options) {
+  choicesEl.innerHTML = '';
+  options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    if(opt.class) btn.classList.add(opt.class);
+    btn.textContent = opt.text;
+    btn.type = 'button';
+    btn.addEventListener('click', () => onChoice(idx));
+    choicesEl.appendChild(btn);
+  });
+}
+
+// quando o jogador escolhe uma opção
+async function onChoice(optionIndex) {
+  if (isTyping) return; // prevenção durante digitação
+  // esconder as opções com fade-out
+  choicesEl.classList.add('fade-out');
+  setTimeout(() => choicesEl.classList.add('hidden'), 180);
+
+  const current = gameData[currentIndex];
+  const chosen = current.options[optionIndex];
+
+  // mostrar a resposta na janela de diálogo
+  const bubble = document.getElementById('bubble');
+  bubble.classList.remove('fade-in');
+  bubble.classList.add('fade-out');
+  await new Promise(r => setTimeout(r, 180));
+  bubble.classList.remove('fade-out');
+  bubble.classList.add('fade-in');
+
+  await typeText(textEl, chosen.response);
+
+  // exibir botão continuar
+  continueBtn.classList.remove('hidden');
+  continueBtn.setAttribute('aria-hidden', 'false');
+  continueBtn.addEventListener('click', onContinue, { once: true });
+}
+
+// botão continuar -> avança para próxima pergunta
+async function onContinue() {
+  if (isTyping) return;
+  continueBtn.classList.add('hidden');
+  continueBtn.setAttribute('aria-hidden', 'true');
+
+  currentIndex++;
+  if (currentIndex >= gameData.length) {
+    // fim do jogo (simples)
+    const bubble = document.getElementById('bubble');
+    bubble.classList.remove('fade-in');
+    bubble.classList.add('fade-out');
+    await new Promise(r => setTimeout(r, 180));
+    bubble.classList.remove('fade-out');
+    bubble.classList.add('fade-in');
+    await typeText(textEl, 'Nada mais acontece por enquanto. Fim do trecho — adicione mais perguntas para continuar.');
+    // opcional: mostrar reiniciar
+    showRestart();
     return;
   }
-  showQuestion(currentQuestionIndex);
+
+  // mostrar próxima pergunta
+  await showQuestion(currentIndex);
 }
 
-function restartGame() {
-  currentQuestionIndex = 0;
-  showQuestion(currentQuestionIndex);
+// renderiza a pergunta index
+async function showQuestion(index) {
+  const data = gameData[index];
+  // mostrar a pergunta como texto com typewriter
+  const bubble = document.getElementById('bubble');
+  bubble.classList.remove('fade-out');
+  bubble.classList.add('fade-in');
+
+  // limpar possíveis textos e opções
+  textEl.textContent = '';
+  choicesEl.classList.remove('hidden');
+  choicesEl.classList.remove('fade-out');
+  choicesEl.innerHTML = '';
+
+  await typeText(textEl, data.question);
+
+  // após a pergunta digitada, renderizar opções
+  showOptions(data.options);
 }
 
-// Inicializa o jogo quando a página carrega
-window.addEventListener('DOMContentLoaded', () => {
-  startGame();
+// reiniciar (simples)
+function showRestart() {
+  choicesEl.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn primary';
+  btn.textContent = 'Reiniciar';
+  btn.addEventListener('click', () => {
+    currentIndex = 0;
+    showQuestion(0);
+  });
+  choicesEl.appendChild(btn);
+  choicesEl.classList.remove('hidden');
+}
+
+// inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  tryStartAmbience();
+  // garantir que o primeiro texto apareça
+  showQuestion(currentIndex);
 });
